@@ -1,0 +1,4 @@
+void checkLand(entity p)
+{	
+
+}

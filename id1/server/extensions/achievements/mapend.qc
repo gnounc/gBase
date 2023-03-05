@@ -1,0 +1,4 @@
+void checkMapend(entity p)
+{
+
+}

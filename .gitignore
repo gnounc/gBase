@@ -1,0 +1,8 @@
+*.cfg
+*.txt
+*.PAK 
+*.lno
+*.dat
+*.sublime-*
+*.exe
+fteqw

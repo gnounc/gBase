@@ -1,0 +1,4 @@
+void checkGib(entity p)
+{
+
+}

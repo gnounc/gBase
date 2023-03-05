@@ -1,0 +1,6 @@
+
+void drawHud()
+{
+	drawObjectiveMarkers();
+	drawDamageCounters();
+}

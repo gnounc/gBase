@@ -1,0 +1,78 @@
+../progs.dat
+
+defs.qc
+fteextensions.qc
+g_defs.qc
+
+../shared/netnames.qc	//gnounc
+extensions/damageCounters.qc
+
+extensions/achievements/attack.qc
+extensions/achievements/damage.qc
+extensions/achievements/gibs.qc
+extensions/achievements/heal.qc
+extensions/achievements/jump.qc
+extensions/achievements/keys.qc
+extensions/achievements/killed.qc
+extensions/achievements/land.qc
+extensions/achievements/mapend.qc
+extensions/achievements/multitrigger.qc
+extensions/achievements/powerups.qc
+extensions/achievements/sigil.qc
+extensions/achievements/skill.qc
+extensions/achievements/teleport.qc
+extensions/achievements/weapon.qc
+
+extensions/callbacks/prototypes.qc
+extensions/callbacks/events.qc
+
+subs.qc
+fight.qc
+ai.qc
+combat.qc
+items.qc
+impulse.qc
+
+weapons/weapons.qc
+weapons/gibs.qc
+weapons/bullets.qc
+weapons/spikes.qc
+weapons/grenades.qc
+weapons/rockets.qc
+weapons/lightning.qc
+
+weapons/axe.qc
+weapons/shotgun.qc
+weapons/super_shotgun.qc
+
+weapons/grenade_launcher.qc
+weapons/rocket_launcher.qc
+weapons/lightning_gun.qc
+
+
+world.qc
+client.qc
+player.qc
+monsters.qc
+doors.qc
+buttons.qc
+triggers.qc
+plats.qc
+misc.qc
+
+monsters/ogre.qc
+monsters/fiend.qc
+monsters/shambler.qc
+monsters/knight.qc
+monsters/grunt.qc
+monsters/scrag.qc
+monsters/rottweiler.qc
+monsters/zombie.qc
+monsters/chthon.qc
+
+monsters/spawn.qc			// registered
+monsters/hellknight.qc		// registered
+monsters/rotfish.qc			// registered
+monsters/vore.qc			// registered
+monsters/enforcer.qc		// registered
+monsters/shub.qc			// registered

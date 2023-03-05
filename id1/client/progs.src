@@ -1,0 +1,18 @@
+../csprogs.dat
+
+csplat.qc
+g_defs.qc
+
+../shared/netnames.qc	//gnounc
+strings.qc
+2d.qc
+drawList.qc
+drawGrid.qc
+
+updateStats.qc
+damageCounters.qc
+
+objectiveMarkers.qc
+drawHud.qc
+main.qc
+view.qc
