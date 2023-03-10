@@ -9,6 +9,8 @@ void CSQC_Init(float apilevel, string enginename, float engineversion)
 {
 	//list of items that are currently being considered objective markers
 
+	setwindowcaption("gBase: gamename");
+
 	deltalisten("progs/missile.mdl", objective_delta_listen, 0);
 	deltalisten("progs/k_spike.mdl", objective_delta_listen, 0);
 	deltalisten("progs/soldier.mdl", objective_delta_listen, 0);

@@ -2,6 +2,15 @@ void updateStats() =
 {
 
 	player_origin = [getstatf(36), getstatf(37), getstatf(38)];
+
+	health = getstatf(39);
+	armortype = getstatf(40);
+	armorvalue = getstatf(41);
+
+	weapon = getstatf(42);
+	ammo_type = getstatf(43);
+	currentammo = getstatf(44);
+
 /*
 	player.origin_x = getstatf(36);//added in worldspawn as illustrated below
 	player.origin_y = getstatf(37);//added in worldspawn as illustrated below

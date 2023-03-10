@@ -3,6 +3,7 @@
 defs.qc
 fteextensions.qc
 g_defs.qc
+inventory.qc
 
 ../shared/netnames.qc	//gnounc
 extensions/damageCounters.qc
@@ -34,6 +35,7 @@ items.qc
 impulse.qc
 
 weapons/weapons.qc
+weapons/projectiles.qc
 weapons/gibs.qc
 weapons/bullets.qc
 weapons/spikes.qc
@@ -44,6 +46,9 @@ weapons/lightning.qc
 weapons/axe.qc
 weapons/shotgun.qc
 weapons/super_shotgun.qc
+
+weapons/nailgun.qc
+weapons/super_nailgun.qc
 
 weapons/grenade_launcher.qc
 weapons/rocket_launcher.qc

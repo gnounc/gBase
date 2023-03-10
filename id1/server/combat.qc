@@ -130,7 +130,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 {
 	local	vector	dir;
 	local	entity	oldself;
-	local	float	save;
+//	local	float	save;
 	local	float	take;
 
 	if (!targ.takedamage)
@@ -147,26 +147,27 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 	if (attacker.super_damage_finished > time)
 		damage = damage * 4;
 
-	// save damage based on the target's armor level
-	save = ceil(targ.armortype*damage);
 
-	if (save >= targ.armorvalue)
+
+	if(targ.e_armor)
 	{
-		save = targ.armorvalue;
-		targ.armortype = 0;	// lost all armor
-		targ.items = targ.items - (targ.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3));
+		take = targ.e_armor.func_armor(targ, inflictor, attacker, damage);
+		bprint("funcarmor is a thing yo\n");
+	}
+	else
+	{
+		take = damage;
+		bprint("funcarmor is not real\n");		
 	}
 	
-	targ.armorvalue = targ.armorvalue - save;
-	take = ceil(damage-save);
 
 	// add to the damage total for clients, which will be sent as a single
 	// message at the end of the frame
 	// FIXME: remove after combining shotgun blasts?
 	if (targ.flags & FL_CLIENT)
 	{
-		targ.dmg_take = targ.dmg_take + take;
-		targ.dmg_save = targ.dmg_save + save;
+		targ.dmg_take +=  take;
+//		targ.dmg_save +=  save;
 		targ.dmg_inflictor = inflictor;
 	}
 

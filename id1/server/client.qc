@@ -43,8 +43,6 @@ void() info_intermission =
 {
 };
 
-
-
 void() SetChangeParms =
 {
 	if (self.health <= 0)
@@ -565,7 +563,7 @@ void() PlayerDie;
 
 void() PutClientInServer =
 {
-	local	entity spot;
+	entity spot;
 
 	self.classname = "player";
 	self.health = 100;
@@ -586,7 +584,46 @@ void() PutClientInServer =
 
 	DecodeLevelParms ();
 	
+	entity starting_weapon = e_shotgun();
+	entity sshotgun = e_super_shotgun();
+	entity glauncher = e_grenade_launcher();
+//	entity axe = e_axe();
+
+/*
+	entity snailgun = e_super_nailgun();
+	entity nailgun = e_nailgun();
+
+	entity rocketlauncher = e_rocket_launcher();
+	entity grenadlauncher = e_grenade_launcher();
+	entity lightninggun = e_lightning_gun();
+*/
+	self.e_weapon = starting_weapon;
+	self.weaponmodel = starting_weapon.weaponmodel;
+
+	self.inventory = hash_createtab(16, EV_ENTITY);
+	add_inventory_item(self, starting_weapon);
+	add_inventory_item(self, sshotgun);
+	add_inventory_item(self, glauncher);
+//	add_inventory_item(self, axe);
+
+/*
+	add_inventory_item(self, nailgun); //TODO: testing
+	add_inventory_item(self, snailgun); //TODO: testing
+
+	add_inventory_item(self, grenadlauncher); //TODO: testing
+	add_inventory_item(self, rocketlauncher); //TODO: testing
+	add_inventory_item(self, lightninggun); //TODO: testing
+*/
+
+/*
+	entity starting_ammo = e_shells();
+	add_inventory_item(self, starting_ammo);
+*/
 	W_SetCurrentAmmo ();
+
+	//TODO: this can go away with a csqc hud.
+		self.currentammo = self.ammo_shells = self.e_weapon.currentammo;
+		self.items = self.items | IT_SHELLS;
 
 	self.attack_finished = time;
 	self.th_pain = player_pain;

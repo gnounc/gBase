@@ -14,6 +14,7 @@ string hovertext;
 .float visible;
 
 vector player_origin;
+float health, armortype, armorvalue, weapon, ammo_type, currentammo;
 
 
 .float		worldtype;	// 0=medieval 1=metal 2=base

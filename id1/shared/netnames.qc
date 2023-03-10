@@ -69,6 +69,32 @@ string getNetname(float item_number) =
 	}
 };
 
+float getIT_NumByStringName(string it_num)
+{
+	switch(it_num)
+	{
+		case "IT_AXE":
+			return IT_AXE;
+		case "IT_SHOTGUN":
+			return IT_SHOTGUN;
+		case "IT_SUPER_SHOTGUN":
+			return IT_SUPER_SHOTGUN;
+		case "IT_NAILGUN":
+			return IT_NAILGUN;
+		case "IT_SUPER_NAILGUN":
+			return IT_SUPER_NAILGUN;
+		case "IT_GRENADE_LAUNCHER":
+			return IT_GRENADE_LAUNCHER;
+		case "IT_ROCKET_LAUNCHER":
+			return IT_ROCKET_LAUNCHER;
+		case "IT_LIGHTNING":
+			return IT_LIGHTNING;
+
+		default:
+			return IT_AXE;
+	}
+}
+
 string getMapname(string m) =
 {
 	switch(m) 

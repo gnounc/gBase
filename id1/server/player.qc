@@ -18,7 +18,7 @@
 */
 
 void() bubble_bob;
-void(float ox) W_FireSpikes;
+void() W_FireSpikes;
 void(vector org, vector dir) launch_spike;
 void() superspike_touch;
 
@@ -206,7 +206,7 @@ void()	player_axed4 =	[$axattd4, player_run	] {self.weaponframe=8;};
 
 //============================================================================
 
-void() player_nail1   =[$nailatt1, player_nail2  ] 
+void() player_nail1  = [$nailatt1, player_nail2  ] 
 {
 	self.effects = self.effects | EF_MUZZLEFLASH;
 
@@ -219,7 +219,7 @@ void() player_nail1   =[$nailatt1, player_nail2  ]
 		self.weaponframe = 1;
 
 	SuperDamageSound();
-	W_FireSpikes (4);
+	W_FireSpikes ();
 	self.attack_finished = time + 0.2;
 };
 
@@ -236,7 +236,7 @@ void() player_nail2   =[$nailatt2, player_nail1  ]
 		self.weaponframe = 1;
 
 	SuperDamageSound();
-	W_FireSpikes (-4);
+	W_FireSpikes ();
 	self.attack_finished = time + 0.2;
 };
 

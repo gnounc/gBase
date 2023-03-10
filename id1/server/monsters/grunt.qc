@@ -55,6 +55,7 @@ $frame prowl_1 prowl_2 prowl_3 prowl_4 prowl_5 prowl_6 prowl_7 prowl_8
 $frame prowl_9 prowl_10 prowl_11 prowl_12 prowl_13 prowl_14 prowl_15 prowl_16
 $frame prowl_17 prowl_18 prowl_19 prowl_20 prowl_21 prowl_22 prowl_23 prowl_24
 
+
 /*
 ==============================================================================
 SOLDIER CODE
@@ -218,7 +219,12 @@ void() army_fire =
 	dir = en.origin - en.velocity*0.2;
 	dir = normalize (dir - self.origin);
 	
-	FireBullets (4, dir, '0.1 0.1 0');
+	entity oldself = self;
+	self = self.e_weapon;
+
+	self.func_attack();
+
+	self = oldself;
 };
 
 
@@ -292,6 +298,8 @@ void() monster_army =
 		return;
 	}
 	
+	bprint("grunt spawned.\n");
+
 	precache_model ("progs/soldier.mdl");
 	precache_model ("progs/h_guard.mdl");
 	precache_model ("progs/gib1.mdl");
@@ -307,6 +315,12 @@ void() monster_army =
 
 	precache_sound ("player/udeath.wav");		// gib death
 
+	self.e_weapon = e_nailgun();
+	self.e_weapon.owner = self;
+
+	self.inventory = hash_createtab(16, EV_ENTITY);
+	add_inventory_item(self, self.e_weapon);
+	add_inventory_item(self, create_e_ammo("shells", 8, 8));
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;

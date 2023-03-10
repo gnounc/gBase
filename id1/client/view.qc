@@ -1,7 +1,8 @@
 // CSQC_UpdateView - Called every rendered frame on the client.  Useful for HUD drawing operations.
+
+
 void CSQC_UpdateView(float vwidth, float vheight, float notmenu)
 {
-
 	screen_size = screen_center = '0 0 0';//prevent noref warning
 	screen_size_x = vwidth;
 	screen_size_y = vheight;
@@ -12,15 +13,9 @@ void CSQC_UpdateView(float vwidth, float vheight, float notmenu)
 	// ALWAYS Clear Current Scene First
 	clearscene();
 
-	// Assign Standard Viewflags
-		// Draw the World (and sky)
-		setviewprop(VF_DRAWWORLD, 1);
-		// Draw the Crosshair
-		setviewprop(VF_DRAWCROSSHAIR, 1);
-		// Draw the Engine Status Bar (the default Quake HUD)
-		setviewprop(VF_DRAWENGINESBAR, 1);
-
-
+	setviewprop(VF_DRAWWORLD, 1);
+	setviewprop(VF_DRAWCROSSHAIR, 1);
+	setviewprop(VF_DRAWENGINESBAR, 1);
 
 	// Setup Entities to be Rendered (include all base types; normal, engine and viewmodels)
 	addentities(MASK_ENGINE | MASK_VIEWMODEL);
@@ -30,6 +25,12 @@ void CSQC_UpdateView(float vwidth, float vheight, float notmenu)
 
 	updateStats();
 
-	//test
-//	drawstring('100 100', "Test..", '8 8', '1 1 1', 1, 0);
+
+//trying to get this to only show when loading a map :/
+	//probably need to stall the game for a bit to show the splashscreen too
+
+		drawfill([screen_size_x - 200, screen_size_y - 40], [117/2, 48/2], '0 0 0', 0.8, 0);
+		drawpic([screen_size_x - 200, screen_size_y - 40], "data/gbase.png", [117/2, 48/2], '1 1 1', 0.8, 0);
+	
+	drawHud();
 }

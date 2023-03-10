@@ -12,7 +12,7 @@ Used for both the player and the ogre
 void(vector org, vector dir) launch_spike =
 {
 	newmis = spawn ();
-	newmis.owner = self;
+	newmis.owner = self.owner;
 	newmis.movetype = MOVETYPE_FLYMISSILE;
 	newmis.solid = SOLID_BBOX;
 
@@ -31,46 +31,62 @@ void(vector org, vector dir) launch_spike =
 
 void() W_FireSuperSpikes =
 {
-	local vector	dir;
+	entity e_attacker = self.owner;
+	entity e_weap = self;
+
+	//for ai
+	entity e_enemy = e_attacker.enemy; 
 	
-	sound (self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
-	self.attack_finished = time + 0.2;
-	self.currentammo = self.ammo_nails = self.ammo_nails - 2;
-	dir = aim (self, 1000);
-	launch_spike (self.origin + '0 0 16', dir);
+	vector direction = '0 0 0';
+	vector org = e_attacker.origin + '0 0 16';
+	if(e_attacker.classname != "player")
+	{
+		direction = e_enemy.origin - e_enemy.velocity*0.2;
+		direction = normalize (direction - e_attacker.origin);
+
+		//bug: this doesnt seem to work, maybe its not the problem?
+		//push spike out a little farther to be outside the shooters bbox
+		org += direction*32;
+	}
+	else
+	{
+		direction = aim (e_weap, 1000);
+	}
+
+	launch_spike (org, direction);
 	newmis.classname = "super_spike";	//so we know the difference --gnounc
 	newmis.touch = superspike_touch;
 	setmodel (newmis, "progs/s_spike.mdl");
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
-	self.punchangle_x = -2;
 };
 
-void(float ox) W_FireSpikes =
+void() W_FireSpikes =
 {
-	local vector	dir;
+	entity e_attacker = self.owner;
+	entity e_weap = self;
+
+	//for ai
+	entity e_enemy = e_attacker.enemy; 
 	
-	makevectors (self.v_angle);
+	makevectors (e_attacker.v_angle);
 	
-	if (self.ammo_nails >= 2 && self.weapon == IT_SUPER_NAILGUN)
+	vector direction = '0 0 0';
+	vector org = e_attacker.origin + '0 0 16';
+	if(e_attacker.classname != "player")
 	{
-		W_FireSuperSpikes ();
-		return;
+		direction = e_enemy.origin - e_enemy.velocity*0.2;
+		direction = normalize (direction - e_attacker.origin);
+
+		//bug: this doesnt seem to work, maybe its not the problem?
+		//push spike out a little farther to be outside the shooters bbox
+		org += direction*32;
+	}
+	else
+	{
+		direction = aim (e_weap, 1000);
 	}
 
-	if (self.ammo_nails < 1)
-	{
-		self.weapon = W_BestWeapon ();
-		W_SetCurrentAmmo ();
-		return;
-	}
-
-	sound (self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-	self.attack_finished = time + 0.2;
-	self.currentammo = self.ammo_nails = self.ammo_nails - 1;
-	dir = aim (self, 1000);
-	launch_spike (self.origin + '0 0 16' + v_right*ox, dir);
-
-	self.punchangle_x = -2;
+	launch_spike (org + direction*(mod(e_weap.currentammo, 2)? 4 : -4), direction);
 };
 
 void() spike_touch =

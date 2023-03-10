@@ -29,3 +29,4 @@ void() GrenadeTouch =
 	if (self.velocity == '0 0 0')
 		self.avelocity = '0 0 0';
 };
+

@@ -635,7 +635,7 @@ void(vector o, vector d, float color, float count) particle = #48;// start a par
 void() ChangeYaw = #49;						// turn towards self.ideal_yaw
 											// at self.yaw_speed
 // #50 was removed
-vector(vector v) vectoangles			= #51;
+vector(vector v) vectoangles			= #51;	/* Returns vector 'pitch yaw 0'. Vector to angles: calculates the pitch angle (aiming) and yaw angle (bearing) corresponding to a given 3D direction v. */
 
 //
 // direct client message generation

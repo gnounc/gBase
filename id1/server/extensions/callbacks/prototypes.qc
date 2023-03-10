@@ -1,5 +1,4 @@
 void initEvents();
-void addTail(entity l);
 void registerCallback(void(entity p) event_cb, string s_event);
 void unregisterCallback(void(entity p) event_cb, string s_event);
 void checkCallbacks(entity p, string s_event);

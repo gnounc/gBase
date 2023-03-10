@@ -359,9 +359,17 @@ void() worldspawn =
 	precache_model("*objectiveMarker");
 	precache_model("*damageCounter");
 
-	clientstat(36,AS_FLOAT_TRUNCATED, origin_x);
-	clientstat(37,AS_FLOAT_TRUNCATED, origin_y);
-	clientstat(38,AS_FLOAT_TRUNCATED, origin_z);
+	clientstat(36, AS_FLOAT_TRUNCATED, origin_x);
+	clientstat(37, AS_FLOAT_TRUNCATED, origin_y);
+	clientstat(38, AS_FLOAT_TRUNCATED, origin_z);
+
+	clientstat(39, AS_FLOAT_TRUNCATED, health);
+	clientstat(40, AS_FLOAT_TRUNCATED, armortype);
+	clientstat(41, AS_FLOAT_TRUNCATED, armorvalue);
+
+	clientstat(42, AS_FLOAT_TRUNCATED, weapon);
+	clientstat(43, AS_FLOAT_TRUNCATED, ammo_type);
+	clientstat(44, AS_FLOAT_TRUNCATED, currentammo);
 };
 
 void() StartFrame =

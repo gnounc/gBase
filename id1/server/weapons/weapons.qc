@@ -23,29 +23,27 @@ void(entity bomb, entity attacker, float rad, entity ignore) T_RadiusDamage;
 void(vector org, vector vel, float damage) SpawnBlood;
 void() SuperDamageSound;
 
-void() W_FireShotgun;
-void() W_FireSuperShotgun;
-void() W_FireGrenade;
-void() W_FireRocket;
+void() FireBullets;
+
+
+//TODO: dont know why the compiler is buggin' here
+entity(string s_classname, float f_lifetime, void() f_touch) create_projectile;
+
+void() spike;
+void() grenade;
+void() missile;
+
 void() ImpulseCommands;
 
 
+void add_inventory_item(entity player, entity item);
+entity get_inventory_item(entity player, string classname)
+entity remove_inventory_item(entity player, string classname)
+
+
 // called by worldspawn
-void() W_Precache =
-{
-	precache_sound ("weapons/r_exp3.wav");	// new rocket explosion
-	precache_sound ("weapons/rocket1i.wav");	// spike gun
-	precache_sound ("weapons/sgun1.wav");
-	precache_sound ("weapons/guncock.wav");	// player shotgun
-	precache_sound ("weapons/ric1.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/ric2.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/ric3.wav");	// ricochet (used in c code)
-	precache_sound ("weapons/spike2.wav");	// super spikes
-	precache_sound ("weapons/tink1.wav");	// spikes tink (used in c code)
-	precache_sound ("weapons/grenade.wav");	// grenade launcher
-	precache_sound ("weapons/bounce.wav");		// grenade bounce
-	precache_sound ("weapons/shotgn2.wav");	// super shotgun
-};
+// no longer used --gnounc
+void() W_Precache = {};
 
 float() crandom =
 {
@@ -115,7 +113,6 @@ void(float damage, vector dir) TraceAttack =
 		SpawnBlood (org, vel*0.2, damage);
 		AddMultiDamage (trace_ent, damage);
 	}
-
 	else
 	{
 		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
@@ -140,56 +137,8 @@ void() W_SetCurrentAmmo =
 {
 	player_run ();		// get out of any weapon firing states
 	self.weaponframe = 0;
-
-	self.items = self.items - ( self.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS) );
-	
-	switch(self.weapon)
-	{
-		case IT_AXE:
-			self.currentammo = 0;
-			self.weaponmodel = "progs/v_axe.mdl";
-			break;
-		case IT_SHOTGUN:
-			self.currentammo = self.ammo_shells;
-			self.weaponmodel = "progs/v_shot.mdl";
-			self.items = self.items | IT_SHELLS;
-			break;
-		case IT_SUPER_SHOTGUN:
-			self.currentammo = self.ammo_shells;
-			self.weaponmodel = "progs/v_shot2.mdl";
-			self.items = self.items | IT_SHELLS;
-			break;
-		case IT_NAILGUN:
-			self.currentammo = self.ammo_nails;
-			self.weaponmodel = "progs/v_nail.mdl";
-			self.items = self.items | IT_NAILS;
-			break;
-		case IT_SUPER_NAILGUN:
-			self.currentammo = self.ammo_nails;
-			self.weaponmodel = "progs/v_nail2.mdl";
-			self.items = self.items | IT_NAILS;
-			break;
-		case IT_GRENADE_LAUNCHER:
-			self.currentammo = self.ammo_rockets;
-			self.weaponmodel = "progs/v_rock.mdl";
-			self.items = self.items | IT_ROCKETS;
-			break;
-		case IT_ROCKET_LAUNCHER:
-			self.currentammo = self.ammo_rockets;
-			self.weaponmodel = "progs/v_rock2.mdl";
-			self.items = self.items | IT_ROCKETS;
-			break;
-		case IT_LIGHTNING:
-			self.currentammo = self.ammo_cells;
-			self.weaponmodel = "progs/v_light.mdl";
-			self.items = self.items | IT_CELLS;
-			break;
-		default:
-			self.currentammo = 0;
-			self.weaponmodel = string_null;
-			break;
-	}
-
+	self.weaponmodel = self.e_weapon.weaponmodel;	//set weaponmodel in case weapon has been changed;
+	self.currentammo = self.e_weapon.currentammo;
 };
 
 float() W_BestWeapon =
@@ -211,24 +160,51 @@ float() W_BestWeapon =
 
 	return IT_AXE;
 };
-//gnounc
-//wanted to get rid of the horrible triple negative when reading the call to checkNoAmmo. 
-//also it was unclear what checkNoAmmo should return for no ammo
-float() W_hasNoAmmo =
+
+
+entity create_e_weapon(string class_name, string ammo_class)
 {
-	if (self.currentammo)
-		return FALSE;	//player has ammo	--gnounc
+	string basepath = strcat("data/weapons/", class_name, "/");
+	string ammo_basepath = strcat("data/ammo/", ammo_class, "/");
 
-	if (self.weapon == IT_AXE)
-		return FALSE;	//the axe doesnt need ammo. so we lie. Player Totally has ammo..Promise! --gnounc
-	
-	self.weapon = W_BestWeapon ();
+	entity e = spawn();
 
-	W_SetCurrentAmmo ();
+	e.classname = class_name;
+	e.ammo_type = ammo_class;
+
+//	precache_sound (strcat(basepath, "/hud"));
+	precache_model(strcat(ammo_basepath, "pickup_model.bsp"));
+	precache_sound(strcat(ammo_basepath, "pickup_sound.wav"));
+
+	precache_model (strcat(basepath, "view_model.mdl"));
+	precache_model (strcat(basepath, "pickup_model.mdl"));
+	precache_model (strcat(basepath, "view_model.mdl"));
 	
-	// drop the weapon down
-	return TRUE;
-};
+	
+	precache_sound (strcat(basepath, "pickup_sound.wav"));
+	precache_sound (strcat(basepath, "attack_sound.wav"));
+
+	precache_sound (strcat(basepath, "empty_sound.wav"));
+	precache_sound (strcat(basepath, "raise_sound.wav"));
+	precache_sound (strcat(basepath, "lower_sound.wav"));
+	precache_sound (strcat(basepath, "reload_sound.wav"));
+
+	e.hud_icon = strcat(basepath, "/hud");
+	e.weaponmodel = strcat(basepath, "view_model.mdl");
+	e.pickup_model = strcat(basepath, "pickup_model.mdl");
+	e.pickup_sound = strcat(basepath, "pickup_sound.wav");
+	e.attack_sound = strcat(basepath, "attack_sound.wav");
+
+	e.empty_sound = strcat(basepath, "empty_sound.wav");
+	e.raise_sound = strcat(basepath, "raise_sound.wav");
+	e.lower_sound = strcat(basepath, "lower_sound.wav");
+	e.reload_sound = strcat(basepath, "reload_sound.wav");
+
+	e.touch = weapon_touch;
+	setmodel (e, e.pickup_model);
+
+	return e;
+}
 
 
 /*
@@ -247,72 +223,150 @@ void()	player_nail1;
 void()	player_light1;
 void()	player_rocket1;
 
+
+//consider making this and weapon_attack just function pointers in the shotgun.qc files themselves.
+void W_Reload()
+{
+	entity e_weap = self;
+	entity e_player = self.owner;
+
+	if(e_weap.reload_finished > time)
+	{
+		sprint(e_player, "time not finished.\n");
+
+		e_weap.think = W_Reload;
+		e_weap.nextthink = e_weap.reload_finished;	//so you can reload immediately after firing, without it being exploitable (cutting out a bit of time so it feels snappier)
+		return;
+	}
+
+	//calc ammo missing from clip
+	float ammo_needed = e_weap.ammo_max - e_weap.currentammo;
+
+	//no ammo needed, so dont reload;
+	if(!ammo_needed)
+	{
+		sprint(e_player, "no ammo needed.\n");
+		return;
+	}
+
+	//only take up to the reload_amount per reload animation.
+	if(ammo_needed > e_weap.reload_amount)
+	{
+		ammo_needed = e_weap.reload_amount;	
+	}
+
+	//find an ammobox in players inventory
+	entity e_ammobox = get_inventory_item(e_player, e_weap.ammo_type);
+
+	if(!e_ammobox)
+	{
+		sprint(e_player, "you dont have an ammobox.\n");
+		return;		
+	}
+
+	if(!e_ammobox.currentammo)
+	{
+		sprint(e_player, "the ammobox is empty.\n");
+		return;				
+	}
+
+	//count ammo available in ammobox (up to the amount needed)
+	float ammo_take = 0;
+	if(e_ammobox.currentammo > ammo_needed)
+	{
+		ammo_take = ammo_needed;
+	}
+	else
+	{
+		ammo_take = e_ammobox.currentammo;
+	}
+
+	//remove ammo from ammobox
+	e_ammobox.currentammo -= ammo_take;
+
+	//add ammo to weapon
+	e_weap.currentammo += ammo_take;
+
+	//play player animation
+	//player_reload();
+
+	//play weapon animation
+	e_weap.func_reload();
+
+	//prevent further action until reloading is done
+	e_weap.attack_finished += e_weap.reload_time;	//for cartridge reloads, this is per cartridge
+
+	//play reload sound
+	sound(e_player, CHAN_WEAPON, e_weap.reload_sound, 1, ATTN_NORM);	
+
+	//update hud
+	e_player.currentammo = e_weap.currentammo;
+
+	//if the ammobox has more ammo to give, and the gun isnt full yet, schedule another one.
+	if((e_ammobox.currentammo) && (e_weap.currentammo < e_weap.ammo_max))
+	{	
+		e_weap.think = W_Reload;
+		e_weap.nextthink = time + e_weap.reload_time;
+		e_weap.reload_finished = time + e_weap.reload_time;
+	}
+
+/*
+	if ammobox is empty, delete ammobox
+	
+	if(e_ammobox.currentammo < 1)
+	{
+		remove_inventory_item(self, "e_weap.ammo_type");
+	}
+*/
+}
+
 void() W_Attack =
 {
-	local	float	r;
+	entity e_weap = self;
+	entity e_player = self.owner;
 
 //	listRegistered();
 
-	if (W_hasNoAmmo())
-		return;
-
-	makevectors	(self.v_angle);		// calculate forward angle for velocity
-	self.show_hostile = time + 1;	// wake monsters up
-
-	switch(self.weapon)
+	//stop trying to reload if you cancel a reload
+	if(e_weap.reload_finished > time)
 	{
-		case IT_AXE:
-			sound (self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-			r = random();
-			if (r < 0.25)
-				player_axe1 ();
-
-			else if (r<0.5)
-				player_axeb1 ();
-
-			else if (r<0.75)
-				player_axec1 ();
-
-			else
-				player_axed1 ();
-
-			self.attack_finished = time + 0.5;
-			break;
-		case IT_SHOTGUN:
-			player_shot1 ();
-			W_FireShotgun ();
-			self.attack_finished = time + 0.5;
-			break;
-		case IT_SUPER_SHOTGUN:
-			player_shot1 ();
-			W_FireSuperShotgun ();
-			self.attack_finished = time + 0.7;
-			break;
-		case IT_NAILGUN:
-			player_nail1 ();
-			break;
-		case IT_SUPER_NAILGUN:
-			player_nail1 ();
-			break;
-		case IT_GRENADE_LAUNCHER:
-			player_rocket1();
-			W_FireGrenade();
-			self.attack_finished = time + 0.6;
-			break;
-		case IT_ROCKET_LAUNCHER:
-			player_rocket1();
-			W_FireRocket();
-			self.attack_finished = time + 0.8;
-			break;
-		case IT_LIGHTNING:
-			player_light1();
-			self.attack_finished = time + 0.1;
-			sound (self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
-			break;
-		default:
-			break;
+		e_weap.think = SUB_Null;
 	}
 
+	if(e_weap.attack_finished > time)
+	{
+		return;
+	}
+
+	e_weap.attack_finished = time + e_weap.attack_time;
+
+	if(e_weap.currentammo < e_weap.ammo_consumption)
+	{
+		sound (e_player, CHAN_WEAPON, e_weap.empty_sound, 1, ATTN_NORM);	
+		return;
+	}
+
+	//attack can interrupt reload. so we need to make sure reload cant interrupt attack...or it will create an exploit for fast-reload
+	e_weap.reload_finished = e_weap.reload_time + time;
+
+	makevectors	(e_player.v_angle);		// calculate forward angle for velocity
+	e_player.show_hostile = time + 1;	// wake monsters up
+
+//play weapons player animation
+	//TODO: Until i figure out how to get a .void() out of a string.
+	if(e_weap.player_animation)
+		e_weap.player_animation();
+
+	self.func_attack();
+
+//	self.fire_animation();
+
+
+	e_player.punchangle_x = (e_weap.kick * -1);	//BUG - appears to not work
+	e_player.currentammo = e_weap.currentammo -= e_weap.ammo_consumption;
+
+	//update hud
+	e_player.currentammo = e_weap.currentammo;
 
 	checkCallbacks(self, "event_attack");
 };
@@ -325,70 +379,84 @@ W_ChangeWeapon
 */
 void() W_ChangeWeapon =
 {
-	local	float	it, am, fl;
-	
-	fl = it = self.items;
-	am = 0;
-
-	fl = pow(2, (self.impulse - 2));
-	switch(fl)
+	if(!self)
 	{
-		case 0.5:
-			fl = IT_AXE;
+		bprint("self is world\n");
+	}
+
+	//TODO: this doesnt appear to be working?
+	entity weap;
+	string str_weapon = "";
+
+	switch(self.impulse)
+	{
+		case 1:
+			str_weapon = "axe";
 			break;
-		case IT_SHOTGUN:
-			if (self.ammo_shells < 1)
-				am = 1;
+		case 2:
+			str_weapon = "shotgun";
 			break;
-		case IT_SUPER_SHOTGUN:
-			if (self.ammo_shells < 2)
-				am = 1;
+		case 3:
+			str_weapon = "super_shotgun";
 			break;
-		case IT_NAILGUN:
-			if (self.ammo_nails < 1)
-				am = 1;
+		case 4:
+			str_weapon = "nailgun";
 			break;
-		case IT_SUPER_NAILGUN:
-			if (self.ammo_nails < 2)
-				am = 1;
+		case 5:
+			str_weapon = "super_nailgun";
 			break;
-		case IT_GRENADE_LAUNCHER:
-			if (self.ammo_rockets < 1)
-				am = 1;
+		case 6:
+			str_weapon = "grenade_launcher";
 			break;
-		case IT_ROCKET_LAUNCHER:
-			if (self.ammo_rockets < 1)
-				am = 1;
+		case 7:
+			str_weapon = "rocket_launcher";
 			break;
-		case IT_LIGHTNING:
-			if (self.ammo_cells < 1)
-				am = 1;
+		case 8:
+			str_weapon = "lightning_gun";
 			break;
 		default:
-			self.currentammo = 0;
-			self.weaponmodel = string_null;				
+			str_weapon = "axe";
 			break;
 	}
+
+	weap = get_inventory_item(self, str_weapon);
 
 	self.impulse = 0;
 	
-	if (!(self.items & fl))
-	{	// don't have the weapon or the ammo
+	sprint (self, strcat("impulse: ", str_weapon,".\n"));
+
+	if(weap == world)
+	{
 		sprint (self, "no weapon.\n");
-		return;
+		return;		
 	}
 	
-	if (am)
+	if (weap.currentammo < 1)
 	{	// don't have the ammo
 		sprint (self, "not enough ammo.\n");
 		return;
 	}
 
-//
-// set weapon, set ammo
-//
-	self.weapon = fl;		
+	if(!self.e_weapon)
+		bprint("no self.e_weapon in changeweapon.\n");
+
+	if(weap.classname == self.e_weapon.classname)
+	{
+		return;
+	}
+
+	self.e_weapon.think = SUB_Null; //stop reloading
+
+	if(!self.e_weapon.func_lower)
+	{
+		bprint("func_lower is null.\n");
+		bprint(strcat("e_weapon.classname", self.e_weapon.classname, "\n"));
+	}
+
+	self.e_weapon.func_lower();
+	self.e_weapon = weap;
 	W_SetCurrentAmmo ();
+	self.e_weapon.func_raise();
 };
 
 
@@ -399,83 +467,44 @@ CycleWeaponCommand
 Go to the next weapon with ammo
 ============
 */
+
 void() CycleWeaponCommand =
 {
-	local	float	it, am;
-	
-	it = self.items;
 	self.impulse = 0;
-	
-	while (1)
+
+	float found = 0;
+	string str_weapon;
+	entity weap = world;	
+	string weaponlist = "shotgun;super_shotgun;nailgun;super_nailgun;grenade_launcher;rocket_launcher;lightning_gun;axe;shotgun;super_shotgun;nailgun;super_nailgun;grenade_launcher;rocket_launcher;lightning_gun";
+
+	float tokencount = tokenizebyseparator(weaponlist, ";");
+
+	for (int i = 0; tokencount > i; ++i)
 	{
-		am = 0;
+		str_weapon = argv(i);
 
-		switch(self.weapon)
+		if(!found)
 		{
-			case IT_LIGHTNING:		
-				self.weapon = IT_AXE;
-				break;
+			if(str_weapon == self.e_weapon.classname)
+			{
+				found = 1;
+			}
 
-			case IT_AXE:
-				self.weapon = IT_SHOTGUN;
-
-				if (self.ammo_shells < 1)
-					am = 1;
-				break;
-
-			case IT_SHOTGUN:
-				self.weapon = IT_SUPER_SHOTGUN;
-
-				if (self.ammo_shells < 2)
-					am = 1;
-				break;		
-
-			case IT_SUPER_SHOTGUN:
-				self.weapon = IT_NAILGUN;
-
-				if (self.ammo_nails < 1)
-					am = 1;
-				break;
-
-			case IT_NAILGUN:
-				self.weapon = IT_SUPER_NAILGUN;
-
-				if (self.ammo_nails < 2)
-					am = 1;
-				break;
-
-			case IT_SUPER_NAILGUN:
-				self.weapon = IT_GRENADE_LAUNCHER;
-
-				if (self.ammo_rockets < 1)
-					am = 1;
-				break;
-
-			case IT_GRENADE_LAUNCHER:
-				self.weapon = IT_ROCKET_LAUNCHER;
-
-				if (self.ammo_rockets < 1)
-					am = 1;
-				break;
-
-			case IT_ROCKET_LAUNCHER:
-				self.weapon = IT_LIGHTNING;
-
-				if (self.ammo_cells < 1)
-					am = 1;
-				break;
-
-			default:
-				break;
+			continue;
 		}
-	
-		if ( (self.items & self.weapon) && am == 0)
+
+		weap = get_inventory_item(self, argv(i));
+
+		if(weap != world)
 		{
+			self.e_weapon.think = SUB_Null; //stop reloading
+			self.e_weapon.func_lower();
+			self.e_weapon = weap;
 			W_SetCurrentAmmo ();
+			self.e_weapon.func_raise();
 			return;
 		}
 	}
-
 };
 
 
@@ -488,81 +517,42 @@ Go to the prev weapon with ammo
 */
 void() CycleWeaponReverseCommand =
 {
-	local float it, am;
-
-	it = self.items;
 	self.impulse = 0;
 
-	while (1)
+	float found = 0;
+	string str_weapon;
+	entity weap = world;	
+	string weaponlist = "lightning_gun;rocket_launcher;grenade_launcher;super_nailgun;nailgun;super_shotgun;shotgun;axe;lightning_gun;rocket_launcher;grenade_launcher;super_nailgun;nailgun;super_shotgun;shotgun";
+
+	float tokencount = tokenizebyseparator(weaponlist, ";");
+
+	for (int i = 0; tokencount > i; ++i)
 	{
-		am = 0;
+		str_weapon = argv(i);
 
-		switch(self.weapon)
+		if(!found)
 		{
-			case IT_LIGHTNING:
-				self.weapon = IT_ROCKET_LAUNCHER;
+			if(str_weapon == self.e_weapon.classname)
+			{
+				found = 1;
+			}
 
-				if (self.ammo_rockets < 1)
-				am = 1;
-				break;
-
-			case IT_ROCKET_LAUNCHER:
-				self.weapon = IT_GRENADE_LAUNCHER;
-
-				if (self.ammo_rockets < 1)
-				am = 1;
-				break;
-
-			case IT_GRENADE_LAUNCHER:
-				self.weapon = IT_SUPER_NAILGUN;
-
-				if (self.ammo_nails < 2)
-				am = 1;
-				break;
-
-			case IT_SUPER_NAILGUN:
-				self.weapon = IT_NAILGUN;
-
-				if (self.ammo_nails < 1)
-				am = 1;
-				break;
-
-			case IT_NAILGUN:
-				self.weapon = IT_SUPER_SHOTGUN;
-
-				if (self.ammo_shells < 2)
-				am = 1;
-				break;
-
-			case IT_SUPER_SHOTGUN:
-				self.weapon = IT_SHOTGUN;
-
-				if (self.ammo_shells < 1)
-				am = 1;
-				break;
-
-			case IT_SHOTGUN:
-				self.weapon = IT_AXE;
-				break;
-
-			case IT_AXE:
-				self.weapon = IT_LIGHTNING;
-
-				if (self.ammo_cells < 1)
-				am = 1;
-				break;
+			continue;
 		}
 
-		if ( (it & self.weapon) && am == 0)
+		weap = get_inventory_item(self, argv(i));
+
+		if(weap != world)
 		{
+			self.e_weapon.think = SUB_Null; //stop reloading
+			self.e_weapon.func_lower();
+			self.e_weapon = weap;
 			W_SetCurrentAmmo ();
+			self.e_weapon.func_raise();
 			return;
 		}
 	}
-
 };
-
-
 
 
 /*
@@ -577,14 +567,21 @@ void() W_WeaponFrame =
 	if (time < self.attack_finished)
 		return;
 
-	if (self.impulse)	// gb, stop wasting performance
+	if ((self.impulse) && (!self.button0))	// gb, stop wasting performance
 		ImpulseCommands ();
 	
 	// check for attack
 	if (self.button0)
 	{
 		SuperDamageSound ();
-		W_Attack ();
+
+		entity oldself;
+		oldself = self;
+		self = self.e_weapon;
+		
+		W_Attack();
+		
+		self = oldself;
 	}
 };
 

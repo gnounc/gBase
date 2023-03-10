@@ -2,36 +2,59 @@
 
 //weapons
 
+.hashtable inventory;
+
+.entity e_weapon;
+.entity e_armor;
+.entity e_powerup;
+
+.string ammo_type;
+
+.void() func_attack;
+.void() func_melee_attack;
+.void() func_reload;
+.void() func_raise;
+.void() func_lower;
+.float(entity targ, entity inflictor, entity attacker, float damage) func_armor;
+
+
 .vector spread;
 .float projectile_count;
 .float attack_type;
+
+.float reload_time;
+.float reload_amount;
+.float reload_finished;	//so we can interrupt reloads without it becoming exploitable
 
 .string projectile_model;
 
 .float kick;
 
+.float ammo_max;
 .float ammo_consumption;
 
-float AT_TRACEATTACK = 1;
-float AT_PROJECTILEATTACK = 2;
 
-.float ammo;
-.float ammo_type;
-
-.string killstring1;
-.string killstring2;
+//.string killstring; in normal defs.
+.string underwater_killstring;
+.string gibstring;
+.string quad_gibstring;
+.string quad_gibstring2;
+.string quad_gibstring3;
 
 .string pickup_model;
 
 .string pickup_sound;
 .string attack_sound;
+.string empty_sound;
+.string raise_sound;
+.string lower_sound;
+.string reload_sound;
 
 .string hud_icon;
 
 .float attack_time;
 
-.void w_fire;
-.void player_animation;
+.void()	player_animation;
 
 void(float num, float type, .__variant fld) clientstat = #232;
 void(float num, float type, string name) globalstat = #233;
